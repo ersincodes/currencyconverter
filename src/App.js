@@ -13,7 +13,7 @@ export default function App() {
       async function convert() {
         setIsLoading(true);
         const res = await fetch(
-          `https://api.frankfurter.app/latest?${amount}=100&from=${fromCur}&to=${toCur}`
+          `https://api.frankfurter.app/latest?amount=${amount}}&from=${fromCur}&to=${toCur}`
         );
         const data = await res.json();
         setConverted(data.rates[toCur]);
