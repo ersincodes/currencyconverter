@@ -1,25 +1,59 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import "./App.css";
 
-function App() {
+export default function App() {
+  const [amount, setAmount] = useState(1);
+  const [fromCur, setFromCur] = useState("EUR");
+  const [toCur, setToCur] = useState("USD");
+  const [converted, setConverted] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(
+    function () {
+      async function convert() {
+        setIsLoading(true);
+        const res = await fetch(
+          `https://api.frankfurter.app/latest?${amount}=100&from=${fromCur}&to=${toCur}`
+        );
+        const data = await res.json();
+        setConverted(data.rates[toCur]);
+        setIsLoading(false);
+      }
+      if (fromCur === toCur) return setConverted(amount);
+      convert();
+    },
+    [amount, fromCur, toCur]
+  );
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <input
+        type="text"
+        value={amount}
+        onChange={(e) => setAmount(Number(e.target.value))}
+        disabled={isLoading}
+      />
+      <select
+        value={fromCur}
+        onChange={(e) => setFromCur(e.target.value)}
+        disabled={isLoading}>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="MXN">MXN</option>
+        <option value="TRY">TRY</option>
+      </select>
+      <select
+        value={toCur}
+        onChange={(e) => setToCur(e.target.value)}
+        disabled={isLoading}>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="MXN">MXN</option>
+        <option value="TRY">TRY</option>
+      </select>
+      <p>
+        {converted}
+        {toCur}
+      </p>
     </div>
   );
 }
-
-export default App;
