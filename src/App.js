@@ -8,29 +8,40 @@ export default function App() {
   const [converted, setConverted] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(
-    function () {
-      async function convert() {
-        setIsLoading(true);
-        const res = await fetch(
-          `https://api.frankfurter.app/latest?amount=${amount}}&from=${fromCur}&to=${toCur}`
-        );
-        const data = await res.json();
-        setConverted(data.rates[toCur]);
-        setIsLoading(false);
-      }
-      if (fromCur === toCur) return setConverted(amount);
-      convert();
-    },
-    [amount, fromCur, toCur]
-  );
+  const convert = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(
+        `https://api.frankfurter.app/latest?amount=${amount}&from=${fromCur}&to=${toCur}`
+      );
+      const data = await res.json();
+      setConverted(data.rates[toCur]);
+    } catch (error) {
+      console.error("There was an error converting the currency:", error);
+      setConverted("Error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Only run on mount and unmount
+  useEffect(() => {
+    convert(); // Initial conversion when the component mounts
+  }, []);
+
   return (
-    <div>
+    <div className="app-container">
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="loader"></div>
+        </div>
+      )}
       <input
         type="text"
         value={amount}
-        onChange={(e) => setAmount(Number(e.target.value))}
+        onChange={(e) => setAmount(e.target.value)}
         disabled={isLoading}
+        placeholder="Enter amount"
       />
       <select
         value={fromCur}
@@ -50,10 +61,10 @@ export default function App() {
         <option value="MXN">MXN</option>
         <option value="TRY">TRY</option>
       </select>
-      <p>
-        {converted}
-        {toCur}
-      </p>
+      <button onClick={convert} disabled={isLoading}>
+        Convert
+      </button>
+      <p>{isLoading ? "Converting..." : `${converted} ${toCur}`}</p>
     </div>
   );
 }
